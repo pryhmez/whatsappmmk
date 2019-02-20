@@ -20,15 +20,19 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
     private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
     private DatabaseReference database;
     private DatabaseReference rootRef;
+    private String currentUserID, id;
 
     private Button createAcctButton;
-    private EditText userEmail, userPassword;
+    private EditText userEmail, userPassword, userPhone;
     private TextView alreadyhaveanacct;
     private ProgressDialog progressDialog;
 
@@ -42,6 +46,7 @@ public class RegisterActivity extends AppCompatActivity {
         rootRef = database;
 
         initializeFields();
+
         alreadyhaveanacct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,10 +84,22 @@ public class RegisterActivity extends AppCompatActivity {
 
                             if(task.isSuccessful()){
 
-                                String currentUserId = mAuth.getCurrentUser().getUid();
+                                String deviceToken = FirebaseInstanceId.getInstance().getToken();
+                                String currentUserId = mAuth.getCurrentUser().getUid().toString();
 
                                 rootRef.child("Users").child(currentUserId).push().setValue("");
+
+                                rootRef.child("Users").child(currentUserId).push().child("device_token")
+                                        .setValue(deviceToken);
+
                                 Log.d("pushed", "registered to database");
+
+                                String pho = userPhone.getText().toString().trim();
+                                HashMap<String, String> profileMap = new HashMap<>();
+                                profileMap.put("phone", pho);
+                                rootRef.child("Users").child(currentUserId).setValue(profileMap);
+
+
                                 takeUserToMainActivity();
 
                                 Toast.makeText(RegisterActivity.this,
@@ -115,6 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
         userEmail = (EditText) findViewById(R.id.register_email);
         userPassword = findViewById(R.id.register_password);
         alreadyhaveanacct = findViewById(R.id.back_to_login);
+        userPhone = findViewById(R.id.phone_number);
         progressDialog = new ProgressDialog(RegisterActivity.this);
 
     }

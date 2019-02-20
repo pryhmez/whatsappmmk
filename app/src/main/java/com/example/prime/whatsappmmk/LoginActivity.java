@@ -17,12 +17,16 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 public class LoginActivity extends AppCompatActivity {
 
 //    private FirebaseUser currentUser;
     private FirebaseAuth mAuth;
     private ProgressDialog loadingBar;
+    private DatabaseReference usersRef;
 
     private Button loginButton;
     private EditText userEmail, userPassword;
@@ -34,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
 //        currentUser = mAuth.getCurrentUser();
 
         InitializeFields();
@@ -79,10 +84,26 @@ public class LoginActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                               takeUserToMainActivity();
-                                loadingBar.dismiss();
-                                Toast.makeText(LoginActivity.this,
-                                        "Signed in successfully", Toast.LENGTH_SHORT).show();
+                                String currentUserID = mAuth.getCurrentUser().getUid();
+                                String deviceToken = FirebaseInstanceId.getInstance().getToken();
+
+                                usersRef.child(currentUserID).child("device_token")
+                                        .setValue(deviceToken)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()){
+
+
+                                                    takeUserToMainActivity();
+                                                    Toast.makeText(LoginActivity.this,
+                                                            "Signed in successfully", Toast.LENGTH_SHORT).show();
+                                                    loadingBar.dismiss();
+
+                                                }
+                                            }
+                                        });
+
                             }else{
                                 String message = task.getException().toString();
                                 Toast.makeText(LoginActivity.this, "Error : " + message,

@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.support.v7.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -38,17 +39,22 @@ import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.HashMap;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class SettingsActivity extends AppCompatActivity {
     private Button updateAccountSettings;
     private EditText userName, userStatus;
-    private ImageView userProfileImage;
+    private CircleImageView userProfileImage;
     private ProgressDialog loadingBar;
 
     private FirebaseAuth mAuth;
     private String currentUserID, id;
     private DatabaseReference rootRef;
-    private static final int galleryPick = 1;
+    private static final int galleryPick = 2;
+    private static final int picturePick = 1;
     private StorageReference userProfileImageRef;
+
+    private Toolbar settingsToolBar;
 
 
     @Override
@@ -83,7 +89,7 @@ public class SettingsActivity extends AppCompatActivity {
                     );
                     if(pictureIntent.resolveActivity(getPackageManager()) != null) {
                         startActivityForResult(pictureIntent,
-                                galleryPick);
+                                picturePick);
                     }
 //
 //                Intent galleryIntent = new Intent();
@@ -101,6 +107,19 @@ public class SettingsActivity extends AppCompatActivity {
 //                Intent chooserIntent = Intent.createChooser(galleryIntent, "Select Image");
 //                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
 
+            }
+        });
+
+        userProfileImage.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("Image/*");
+
+                startActivityForResult(galleryIntent, galleryPick);
+                return false;
             }
         });
     }
@@ -150,11 +169,12 @@ public class SettingsActivity extends AppCompatActivity {
         if(TextUtils.isEmpty(setStatus)){
             userStatus.setError("pls write status");
         }else{
-            HashMap<String, String> profileMap = new HashMap<>();
+            HashMap<String, Object> profileMap = new HashMap<>();
                     profileMap.put("uid", currentUserID);
                     profileMap.put("name", setUserName);
                     profileMap.put("status", setStatus);
-            rootRef.child("Users").child(currentUserID).setValue(profileMap).
+                    profileMap.put("phone", "");
+            rootRef.child("Users").child(currentUserID).updateChildren(profileMap).
                     addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -180,6 +200,13 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void initializeFields() {
+
+        settingsToolBar = (Toolbar) findViewById(R.id.settings_toolbar);
+        setSupportActionBar(settingsToolBar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setTitle("Account Settings");
+
         updateAccountSettings = findViewById(R.id.updatesettings);
         userName = findViewById(R.id.set_user_name);
         userStatus = findViewById(R.id.set_profile_status);
@@ -193,7 +220,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == galleryPick && resultCode == RESULT_OK && data !=null);
+        if (requestCode == picturePick && resultCode == RESULT_OK && data !=null);
         {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap)extras.get("data");
@@ -227,6 +254,13 @@ public class SettingsActivity extends AppCompatActivity {
 //                        }
 //                    }
 //                });
+            }
+            if (galleryPick == requestCode && resultCode == RESULT_OK && data != null){
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap)extras.get("data");
+                userProfileImage.setImageBitmap(imageBitmap);
+
+                uploadImage();
             }
         }
 

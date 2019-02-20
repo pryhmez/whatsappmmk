@@ -19,6 +19,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class FindFriendsActivity extends AppCompatActivity {
 
     private Toolbar mtoolbar;
@@ -97,7 +99,7 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     public static class FindFriendsViewHolder extends RecyclerView.ViewHolder{
         TextView userName, userStatus;
-        ImageView profileImage;
+        CircleImageView profileImage;
 
         public FindFriendsViewHolder(@NonNull View itemView) {
             super(itemView);

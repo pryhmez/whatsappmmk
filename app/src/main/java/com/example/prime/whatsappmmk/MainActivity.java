@@ -27,7 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
-
+//mtoolbar is for the tool bar which will be appearing ontop of the screen.
     private Toolbar mToolbar;
     private ViewPager myviewPager;
     private TabLayout myTabLayout;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.main_app_bar);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("IGHUB SOCIAL");
+        getSupportActionBar().setTitle("IGHELLO");
 
         myviewPager = (ViewPager) findViewById(R.id.mains_tabs_pager);
         myTabsAccessorAdapter = new TabsAccessorAdapter(getSupportFragmentManager());
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+//If there is no user then it sends the user to the login page.
         if(currentUser == null){
             sendUserToLoginActivity();
         }else{
@@ -71,21 +71,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void verifyUserExistence() {
+        //gets the user id.
         final String currentUserId = currentUser.getUid();
-
+//references the firebase database
         rootRef = FirebaseDatabase.getInstance().getReference();
-
+//this creates a child in the database Users and regs the users with there unique userId.
         rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
 
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //then if it is created already it toasts welcome.
                 if((dataSnapshot.child("name").exists())){
                     Toast.makeText(MainActivity.this, "Welcome", Toast.LENGTH_SHORT).show();
                 }else{
                     sendUserToSettingsActivity();
 //                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
-                    Toast.makeText(MainActivity.this, "okay ohhh", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "pls set profile picture, name and status", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -151,12 +153,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestNewGroup() {
+        //brings up an alert dialoog for the user to enter the group name.
         AlertDialog.Builder builder = new AlertDialog.Builder(
                 MainActivity.this, R.style.AlertDialog);
         builder.setTitle("Enter Group Name :");
 
         final EditText groupNameField = new EditText(MainActivity.this);
-        groupNameField.setHint("e.g ighub social");
+        groupNameField.setHint("e.g ighello");
         builder.setView(groupNameField);
 
         builder.setPositiveButton("create", new DialogInterface.OnClickListener() {
@@ -166,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 String groupName = groupNameField.getText().toString();
 
                 if (TextUtils.isEmpty(groupName)){
+                    groupNameField.setError("");
                     Toast.makeText(MainActivity.this, "Pls write your group name...", Toast.LENGTH_SHORT).show();
                 }
                 else{
@@ -209,14 +213,11 @@ public class MainActivity extends AppCompatActivity {
     }
     private void sendUserToSettingsActivity() {
         Intent settingsintent = new Intent(MainActivity.this, SettingsActivity.class);
-//        settingsintent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(settingsintent);
-        finish();
     }
 
     private void sendUserToFindFriendsActivity() {
         Intent friendsintent = new Intent(MainActivity.this, FindFriendsActivity.class);
         startActivity(friendsintent);
-        finish();
     }
 }

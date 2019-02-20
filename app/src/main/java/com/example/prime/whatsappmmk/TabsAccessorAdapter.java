@@ -8,7 +8,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 /**
  * Created by prime on 11/12/18.
  */
-
+//this class is what helps the fragments adapt tothe main activity the way the do.
 public class TabsAccessorAdapter extends FragmentPagerAdapter
 {
 
@@ -31,8 +31,11 @@ public class TabsAccessorAdapter extends FragmentPagerAdapter
             case 2:
                 ContactsFragment contactsFragment = new ContactsFragment();
                 return  contactsFragment;
+            case 3:
+                RequestFragment requestFragment = new RequestFragment();
+                return  requestFragment;
 
-                default:
+            default:
                     return null;
         }
 
@@ -40,7 +43,7 @@ public class TabsAccessorAdapter extends FragmentPagerAdapter
 
     @Override
     public int getCount() {
-        return 3;
+        return 4;
     }
 
 
@@ -55,6 +58,9 @@ public class TabsAccessorAdapter extends FragmentPagerAdapter
 
             case 2:
                 return "Contacts";
+
+            case 3:
+                return "Requests";
 
             default:
                 return null;
